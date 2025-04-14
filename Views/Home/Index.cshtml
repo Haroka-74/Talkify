@@ -28,6 +28,9 @@
         @if (User.Identity.IsAuthenticated)
         {
             <div class = "auth-buttons">
+                <a asp-controller = "Search" asp-action = "Index" class = "btn btn-search">
+                    <i class = "fas fa-search"></i> Search Users
+                </a>
                 <a asp-controller = "Chat" asp-action = "UserChats" class = "btn btn-chat">
                     <i class = "fas fa-user-friends"> </i> Private Chats
                 </a>

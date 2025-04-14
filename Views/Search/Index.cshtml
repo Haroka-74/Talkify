@@ -1,0 +1,62 @@
+﻿@model List<Talkify.DTOs.SearchDTOs.SearchDTO>
+
+@{
+    ViewData["Title"] = "Search Users";
+    var searchTerm = ViewBag.SearchTerm as string ?? "";
+}
+
+@section Styles {
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
+    <link rel = "stylesheet" href = "~/css/Search.css" asp-append-version = "true" />
+}
+
+<div class = "search-page">
+    <div class = "header-container">
+        <button class = "btn btn-back" onclick = "window.history.back()">
+            <i class = "fas fa-arrow-left"></i> Back
+        </button>
+    </div>
+    <div class = "logo-container">
+        <i class = "fas fa-search logo-icon"> </i>
+        <h2> Search Users </h2>
+    </div>
+    <form method = "get" asp-controller = "Search" asp-action = "Index" class = "search-form">
+        <div class = "input-group">
+            <input type = "text" name = "searchTerm" value = "@searchTerm" placeholder = "Search by username..." class = "form-control" />
+            <button type = "submit" class = "btn btn-search">
+                <i class = "fas fa-search"> </i> Search
+            </button>
+        </div>
+    </form>
+    <div class = "user-results">
+        @if (Model.Any())
+        {
+            <ul class = "list-group">
+                @foreach (var user in Model)
+                {
+                    <li class = "list-group-item">
+                        <div class = "user-info">
+                            <strong> @user.Username </strong>
+                        </div>
+                        <a href = "#" class = "btn btn-chat">
+                            <i class = "fas fa-comment"></i> Message
+                        </a>
+                    </li>
+                }
+            </ul>
+        }
+        else if (!string.IsNullOrEmpty(searchTerm))
+        {
+            <p class = "no-results">
+                <i class = "far fa-frown"> </i> No users found matching "@searchTerm"
+            </p>
+        }
+        else
+        {
+            <p class = "no-results">
+                <i class = "fas fa-users"></i> Start typing to search for users
+            </p>
+        }
+    </div>
+</div>

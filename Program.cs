@@ -2,6 +2,10 @@ using Talkify.Data;
 using Microsoft.EntityFrameworkCore;
 using Talkify.Models.Auth;
 using Microsoft.AspNetCore.Identity;
+using Talkify.Repositories.Interfaces;
+using Talkify.Repositories.Implementations;
+using Talkify.Services.Interfaces;
+using Talkify.Services.Implementations;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<TalkifyDbContext>(options =>
@@ -16,6 +20,8 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LoginPath = "/Auth/Login";
 });
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<ISearchService, SearchService>();
 
 var app = builder.Build();
 
