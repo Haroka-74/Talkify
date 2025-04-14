@@ -1,8 +1,56 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@using System.Security.Claims
+@using Talkify.Extensions
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@section Styles {
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
+    <link rel = "stylesheet" href = "~/css/Home.css" asp-append-version = "true" />
+}
+
+<div class = "home-container">
+    <div class = "hero-card">
+        <div class = "logo-container">
+            <i class = "fas fa-comment-dots logo-icon"></i>
+            @if (User.Identity.IsAuthenticated)
+            {
+                <h1 class="app-title"> Welcome @ClaimsPrincipalExtensions.GetUsername(User) </h1>
+            }
+            else
+            {
+                <h1 class = "app-title"> Welcome To Talkify </h1>
+                <p class = "app-subtitle"> Connect with friends and communities </p>
+            }
+        </div>
+        @if (User.Identity.IsAuthenticated)
+        {
+            <div class = "auth-buttons">
+                <a asp-controller = "Chat" asp-action = "UserChats" class = "btn btn-chat">
+                    <i class = "fas fa-user-friends"> </i> Private Chats
+                </a>
+                <a asp-controller = "Group" asp-action = "MyGroups" class = "btn btn-group">
+                    <i class="fas fa-users-cog"> </i> My Groups
+                </a>
+                <form asp-controller = "Auth" asp-action = "Logout" method = "post" class = "d-inline">
+                    <button type = "submit" class = "btn btn-logout">
+                        <i class = "fas fa-sign-out-alt fa-flip-horizontal"> </i> Sign Out
+                    </button>
+                </form>
+            </div>
+        }
+        else
+        {
+            <div class = "auth-buttons">
+                <a asp-controller = "Auth" asp-action = "Login" class = "btn btn-login">
+                    <i class = "fas fa-sign-in-alt"> </i> Login
+                </a>
+                <a asp-controller = "Auth" asp-action = "Register" class = "btn btn-register">
+                    <i class = "fas fa-user-plus"> </i> Register
+                </a>
+            </div>
+        }
+    </div>
 </div>

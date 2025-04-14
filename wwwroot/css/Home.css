@@ -1,0 +1,196 @@
+﻿:root {
+    --primary-color: #3a56e8;
+    --secondary-color: #2d3fc7;
+    --accent-color: #3a7bd5;
+    --danger-color: #e91e63;
+    --success-color: #00b4d8;
+    --light-color: #f8f9fa;
+    --dark-color: #1a1a2e;
+    --card-bg: #16213e;
+    --text-light: #f0f0f0;
+    --text-muted: #9a9a9a;
+    --border-color: rgba(255, 255, 255, 0.15);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+    font-family: 'Gabarito', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-light);
+}
+
+.home-container {
+    width: 100%;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.hero-card {
+    background: var(--card-bg);
+    padding: 4rem 3rem;
+    border-radius: 24px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3), 0 0 0 1px var(--border-color);
+    text-align: center;
+    width: 100%;
+    max-width: 600px;
+    min-height: 400px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.hero-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--border-color);
+}
+
+.hero-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--accent-color), var(--primary-color));
+}
+
+.logo-container {
+    margin-bottom: 2.5rem;
+}
+
+.logo-icon {
+    font-size: 4rem;
+    color: white;
+    margin-bottom: 1.5rem;
+    filter: brightness(1.05);
+    transition: all 0.3s ease;
+}
+
+.app-title {
+    color: white;
+    font-weight: 700;
+    font-size: 2.8rem;
+    margin-bottom: 0.8rem;
+    background: linear-gradient(to right, white, #c9d6ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    font-family: 'Gabarito', sans-serif;
+    letter-spacing: 0.5px;
+}
+
+.app-subtitle {
+    color: var(--text-light);
+    font-size: 1.3rem;
+    margin-bottom: 3rem;
+    font-weight: 400;
+    font-family: 'Gabarito', sans-serif;
+}
+
+.auth-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+    margin-top: 1rem;
+}
+
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: 'Gabarito', sans-serif;
+    min-width: 180px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.btn i {
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.btn-login {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-login:hover {
+    background-color: #304fd6;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(58, 86, 232, 0.25);
+}
+
+.btn-register {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.btn-register:hover {
+    background-color: #00a0c8;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(0, 180, 216, 0.25);
+}
+
+.btn-chat {
+    background-color: var(--accent-color);
+    color: white;
+}
+
+.btn-chat:hover {
+    background-color: #3270c2;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(58, 123, 213, 0.25);
+}
+
+.btn-group {
+    background-color: #7b2cbf;
+    color: white;
+}
+
+.btn-group:hover {
+    background-color: #6c23b0;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(123, 44, 191, 0.25);
+}
+
+.btn-logout {
+    background-color: var(--danger-color);
+    color: white;
+}
+
+.btn-logout:hover {
+    background-color: #d8175e;
+    transform: scale(1.03);
+    box-shadow: 0 6px 12px rgba(233, 30, 99, 0.25);
+}

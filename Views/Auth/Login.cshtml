@@ -1,0 +1,57 @@
+﻿@using Talkify.DTOs.AuthDTOs
+@model LoginDTO
+
+@{
+    ViewData["Title"] = "Login";
+}
+
+@section Styles {
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
+    <link rel = "stylesheet" href = "~/css/Login.css" asp-append-version = "true" />
+}
+
+<div class = "login-page">
+    <div class = "login-container">
+        <div class = "login-card">
+            <div class = "login-header">
+                <i class = "fas fa-sign-in-alt"></i>
+                <h2> Login to Talkify </h2>
+            </div>
+            <form asp-action = "Login" method = "post">
+                <div asp-validation-summary = "ModelOnly" class = "error-summary"></div>
+                <div class = "form-group">
+                    <label asp-for = "Username">
+                        <i class = "fas fa-user"> </i> Username
+                    </label>
+                    <input asp-for = "Username" type = "text" placeholder = "Enter your username">
+                    <span asp-validation-for = "Username" class = "field-error"></span>
+                </div>
+                <div class = "form-group">
+                    <label asp-for = "Password">
+                        <i class = "fas fa-lock"> </i> Password
+                    </label>
+                    <input asp-for = "Password" type = "password" placeholder = "Enter your password">
+                    <span asp-validation-for = "Password" class = "field-error"> </span>
+                </div>
+                <div class = "form-options">
+                    <label class = "remember-me">
+                        <input asp-for = "RememberMe" type = "checkbox"> Remember me
+                    </label>
+                </div>
+                <div class = "form-actions">
+                    <button type = "submit" class = "btn-login">
+                        <i class = "fas fa-sign-in-alt"> </i> Login
+                    </button>
+                    <a asp-controller = "Home" asp-action = "Index" class = "btn-back">
+                        <i class = "fas fa-arrow-left"> </i> Back
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name = "_ValidationScriptsPartial" />
+}
