@@ -1,13 +1,16 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Talkify.Models.Auth;
+using Talkify.Models.Chats;
+using Talkify.Models.Messages;
 
 namespace Talkify.Data
 {
     public class TalkifyDbContext : IdentityDbContext<TalkifyUser>
     {
 
-        // Props:
+        public DbSet<Chat> Chats { get; set; }
+        public DbSet<Message> Messages { get; set; }
 
         public TalkifyDbContext(DbContextOptions<TalkifyDbContext> options) : base(options) { }
 
