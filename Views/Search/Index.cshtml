@@ -39,7 +39,7 @@
                         <div class = "user-info">
                             <strong> @user.Username </strong>
                         </div>
-                        <a href = "#" class = "btn btn-chat">
+                        <a href = "@Url.Action("OpenChat", "Chat", new { receiverId = user.UserId, receiverUsername = user.Username })" class = "btn btn-chat">
                             <i class = "fas fa-comment"></i> Message
                         </a>
                     </li>
