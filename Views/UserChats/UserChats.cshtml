@@ -1,0 +1,51 @@
+﻿@model List<Talkify.DTOs.ChatDTOs.ChatDTO>
+
+@{
+    ViewData["Title"] = "My Chats";
+}
+
+@section Styles {
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
+    <link rel = "stylesheet" href = "~/css/UserChats.css" asp-append-version = "true" />
+}
+
+<div class = "chat-list-container">
+    <div class = "chat-list-header">
+        <button class = "btn-back" onclick = "window.history.back()">
+            <i class = "fas fa-arrow-left"></i> Back
+        </button>
+        <h2> My Chats </h2>
+    </div>
+    <div class = "chat-list-content">
+        @if (Model.Any())
+        {
+            <div class = "chat-items">
+                @foreach (var chat in Model)
+                {
+                    <a href = "@Url.Action("OpenChat", "Chat", new { receiverId = chat.ReceiverId, receiverUsername = chat.ReceiverUsername })" class = "chat-item">
+                        <div class = "chat-avatar">
+                            <i class = "fas fa-user-circle"></i>
+                        </div>
+                        <div class = "chat-details">
+                            <div class = "chat-header">
+                                <span class = "chat-username"> @chat.ReceiverUsername </span>
+                                <span class = "chat-time"> @chat.LastMessageTime.ToString("h:mm tt") </span>
+                            </div>
+                            <div class = "chat-preview">
+                                <p class = "chat-message"> @(chat.LastMessage.Length > 30 ? chat.LastMessage.Substring(0, 30) + "..." : chat.LastMessage) </p>
+                            </div>
+                        </div>
+                    </a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class = "no-chats">
+                <i class = "fas fa-comment-slash"></i>
+                <p> No conversations yet </p>
+            </div>
+        }
+    </div>
+</div>

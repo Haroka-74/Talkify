@@ -14,6 +14,11 @@ namespace Talkify.Hubs
             this.messageRepository = messageRepository;
         }
 
+        public async Task JoinGroup(string chatId)
+        {
+            await Groups.AddToGroupAsync(Context.ConnectionId, chatId);
+        }
+
         public async Task SendMessage(string chatId, string senderId, string receiverId, string content)
         {
             var message = new Message
@@ -26,7 +31,7 @@ namespace Talkify.Hubs
 
             await messageRepository.AddMessageAsync(message);
 
-            await Clients.Users(senderId, receiverId).SendAsync("ReceiveMessage", chatId, senderId, receiverId, content);
+            await Clients.Group(chatId).SendAsync("ReceiveMessage", chatId, senderId, receiverId, content);
         }
 
     }

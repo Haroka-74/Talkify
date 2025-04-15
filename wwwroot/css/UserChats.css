@@ -1,0 +1,202 @@
+﻿:root {
+    --primary: #4361ee;
+    --primary-dark: #3a56e8;
+    --accent-color: #3a7bd5;
+    --text-light: #f0f0f0;
+    --text-muted: #9a9a9a;
+    --border: rgba(255, 255, 255, 0.15);
+    --card-bg: rgba(22, 33, 62, 0.8);
+    --gradient-bg: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+}
+
+body {
+    background: var(--gradient-bg);
+    font-family: 'Gabarito', sans-serif;
+    min-height: 100vh;
+    margin: 0;
+    padding: 20px;
+    color: var(--text-light);
+}
+
+.chat-list-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 2rem;
+    background: var(--card-bg);
+    border-radius: 16px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-list-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(to right, var(--accent-color), var(--primary));
+}
+
+.chat-list-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.chat-list-header h2 {
+    color: transparent;
+    font-size: 1.8rem;
+    margin: 0;
+    background: linear-gradient(90deg, #f8f9fa 0%, #c9d6ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.chat-list-header h2 i {
+    font-size: 1.5rem;
+    color: var(--accent-color);
+}
+
+.btn-back {
+    background: rgba(67, 97, 238, 0.2);
+    color: var(--text-light);
+    border: 1px solid var(--primary);
+    border-radius: 50px;
+    padding: 0.5rem 1.25rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    font-family: 'Gabarito', sans-serif;
+    transition: all 0.3s ease;
+}
+
+.btn-back:hover {
+    background: var(--primary);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(58, 86, 232, 0.3);
+}
+
+.chat-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.chat-item {
+    display: flex;
+    gap: 1rem;
+    padding: 1rem;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    transition: all 0.3s ease;
+    text-decoration: none;
+    align-items: center;
+}
+
+.chat-item:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.chat-avatar {
+    font-size: 2rem;
+    color: var(--accent-color);
+    flex-shrink: 0;
+}
+
+.chat-details {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    align-items: center;
+}
+
+.chat-username {
+    color: var(--text-light);
+    font-weight: 500;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.chat-time {
+    color: var(--accent-color);
+    font-size: 0.75rem;
+    flex-shrink: 0;
+    margin-left: 0.5rem;
+}
+
+.chat-preview {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.chat-message {
+    margin: 0;
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.btn-message {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+}
+
+.btn-message:hover {
+    background: var(--accent-color);
+    transform: scale(1.1);
+}
+
+.no-chats {
+    text-align: center;
+    padding: 3rem 0;
+    color: var(--text-muted);
+}
+
+.no-chats i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    color: var(--border);
+}
+
+.no-chats p {
+    margin: 0;
+    font-size: 1.1rem;
+}

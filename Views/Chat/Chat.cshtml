@@ -43,52 +43,49 @@
 @section Scripts {
     <script src = "~/lib/SignalR/signalr.js"></script>
     <script>
-        const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
 
-        connection.start().catch(err => console.error(err.toString()));
+        var currentChatId = "@chatId";
+        var currentUserId = "@currentUserId";
+        var receiverId = "@receiverId";
 
-        const form = document.getElementById("messageForm");
-        const messageInput = document.getElementById("messageInput");
-        const chatDiv = document.getElementById("chatMessages");
-
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            const content = messageInput.value.trim();
-            if (!content) return;
-
-            const chatId = "@chatId";
-            const senderId = "@currentUserId";
-            const receiverId = "@receiverId";
-
-            connection.invoke("SendMessage", chatId, senderId, receiverId, content).catch(err => console.error(err.toString()));
-
-            messageInput.value = "";
-        });
+        document.getElementById("sendButton").disabled = true;
 
         connection.on("ReceiveMessage", function (chatId, senderId, receiverId, content) {
-            const currentUserId = "@currentUserId";
-            const isMe = currentUserId === senderId;
+            var isMe = senderId === currentUserId;
+            var timestamp = formatTime(new Date());
 
-            const msg = document.createElement("div");
-            msg.classList.add("chat-message", isMe ? "sent" : "received");
+            var messageDiv = document.createElement("div");
+            messageDiv.className = "chat-message " + (isMe ? "sent" : "received");
 
-            const contentDiv = document.createElement("div");
-            contentDiv.classList.add("message-content");
-            contentDiv.textContent = content;
+            messageDiv.innerHTML = `
+                <div class="message-content">${content}</div>
+                <div class="message-timestamp">${timestamp}</div>
+            `;
 
-            const timeDiv = document.createElement("div");
-            timeDiv.classList.add("message-timestamp");
+            document.getElementById("chatMessages").appendChild(messageDiv);
+            document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+        });
 
-            const now = new Date();
-            const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true});
-            timeDiv.textContent = formattedTime;
+        function formatTime(date) {
+            return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+        }
 
-            msg.appendChild(contentDiv);
-            msg.appendChild(timeDiv);
-            chatDiv.appendChild(msg);
+        connection.start().then(function () {
+            document.getElementById("sendButton").disabled = false;
+            connection.invoke("JoinGroup", currentChatId);
+        }).catch(function (err) {
+            return console.error(err.toString());
+        });
 
-            chatDiv.scrollTop = chatDiv.scrollHeight;
+        document.getElementById("messageForm").addEventListener("submit", function (event) {
+            var content = document.getElementById("messageInput").value;
+            connection.invoke("SendMessage", currentChatId, currentUserId, receiverId, content)
+                .catch(function (err) {
+                    return console.error(err.toString());
+                });
+            document.getElementById("messageInput").value = "";
+            event.preventDefault();
         });
     </script>
 }
