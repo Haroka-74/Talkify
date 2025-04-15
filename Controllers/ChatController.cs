@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using System.Threading.Tasks;
 using Talkify.Extensions;
 using Talkify.Services.Interfaces;
 
@@ -21,16 +20,18 @@ namespace Talkify.Controllers
 
             var chatId = await chatService.OpenChatBetweenUsersAsync(id, receiverId);
 
-            return RedirectToAction("ChatPage", new { chatId, receiverUsername, receiverId });
+            return RedirectToAction("Chat", new { chatId, receiverUsername, receiverId });
         }
 
-        public async Task<IActionResult> ChatPage(string chatId, string receiverUsername, string receiverId)
+        public async Task<IActionResult> Chat(string chatId, string receiverUsername, string receiverId)
         {
-            ViewData["receiverUsername"] = receiverUsername;
-            ViewData["LoggedUserId"] = ClaimsPrincipalExtensions.GetUserId(User);
             ViewData["ChatId"] = chatId;
-            ViewData["ReceiverId"] = receiverId;
+            ViewData["receiverUsername"] = receiverUsername;
+            ViewData["receiverId"] = receiverId;
+            ViewData["currentUserId"] = ClaimsPrincipalExtensions.GetUserId(User);
+
             var chatMessages = await chatService.GetChatMessages(chatId);
+
             return View(chatMessages);
         }
 

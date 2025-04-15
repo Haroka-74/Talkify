@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.SignalR;
-using Talkify.DTOs.MessageDTOs;
 using Talkify.Models.Messages;
 using Talkify.Repositories.Interfaces;
 
@@ -22,8 +21,7 @@ namespace Talkify.Hubs
                 Id = Guid.NewGuid().ToString(),
                 Content = content,
                 SenderId = senderId,
-                ChatId = chatId,
-                SentAt = DateTime.Now,
+                ChatId = chatId
             };
 
             await messageRepository.AddMessageAsync(message);

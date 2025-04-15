@@ -1,0 +1,94 @@
+﻿@model List<Talkify.DTOs.MessageDTOs.MessageDTO>
+
+@{
+    ViewData["Title"] = "Chat Page";
+    var chatId = ViewData["ChatId"];
+    var receiverUsername = ViewData["receiverUsername"];
+    var receiverId = ViewData["receiverId"];
+    var currentUserId = ViewData["currentUserId"];
+}
+
+@section Styles {
+    <link rel = "stylesheet" href = "~/css/Chat.css" />
+    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+}
+
+<div class = "chat-container">
+    <div class = "chat-header">
+        <button class = "btn btn-back" onclick = "window.history.back()">
+            <i class = "fas fa-arrow-left"></i> Back
+        </button>
+        <h3> @receiverUsername </h3>
+    </div>
+    <div class = "chat-messages" id = "chatMessages">
+        @foreach (var message in Model)
+        {
+            var isMe = message.SenderId == currentUserId!.ToString();
+            <div class = "chat-message @(isMe ? "sent" : "received")">
+                <div class = "message-content"> @message.Content </div>
+                <div class = "message-timestamp">
+                    @message.SentAt.ToString("h:mm tt")
+                </div>
+            </div>
+        }
+    </div>
+    <form id = "messageForm" class = "chat-input">
+        <input type = "text" id = "messageInput" name = "content" placeholder = "Type a message ..." required autocomplete = "off" />
+        <button type = "submit" id = "sendButton">
+            <i class = "fas fa-paper-plane"></i>
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script src = "~/lib/SignalR/signalr.js"></script>
+    <script>
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        connection.start().catch(err => console.error(err.toString()));
+
+        const form = document.getElementById("messageForm");
+        const messageInput = document.getElementById("messageInput");
+        const chatDiv = document.getElementById("chatMessages");
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const content = messageInput.value.trim();
+            if (!content) return;
+
+            const chatId = "@chatId";
+            const senderId = "@currentUserId";
+            const receiverId = "@receiverId";
+
+            connection.invoke("SendMessage", chatId, senderId, receiverId, content).catch(err => console.error(err.toString()));
+
+            messageInput.value = "";
+        });
+
+        connection.on("ReceiveMessage", function (chatId, senderId, receiverId, content) {
+            const currentUserId = "@currentUserId";
+            const isMe = currentUserId === senderId;
+
+            const msg = document.createElement("div");
+            msg.classList.add("chat-message", isMe ? "sent" : "received");
+
+            const contentDiv = document.createElement("div");
+            contentDiv.classList.add("message-content");
+            contentDiv.textContent = content;
+
+            const timeDiv = document.createElement("div");
+            timeDiv.classList.add("message-timestamp");
+
+            const now = new Date();
+            const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true});
+            timeDiv.textContent = formattedTime;
+
+            msg.appendChild(contentDiv);
+            msg.appendChild(timeDiv);
+            chatDiv.appendChild(msg);
+
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        });
+    </script>
+}

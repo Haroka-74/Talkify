@@ -27,8 +27,7 @@ namespace Talkify.Services.Implementations
                 {
                     Id = Guid.NewGuid().ToString(),
                     UserId1 = userId1,
-                    UserId2 = userId2,
-                    CreatedAt = DateTime.UtcNow
+                    UserId2 = userId2
                 };
 
                 await chatRepository.CreateChatAsync(newChat);
