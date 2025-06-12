@@ -1,5 +1,4 @@
 ﻿@model List<Talkify.DTOs.MessageDTOs.MessageDTO>
-
 @{
     ViewData["Title"] = "Chat Page";
     var chatId = ViewData["ChatId"];
@@ -7,64 +6,73 @@
     var receiverId = ViewData["receiverId"];
     var currentUserId = ViewData["currentUserId"];
 }
-
 @section Styles {
-    <link rel = "stylesheet" href = "~/css/Chat.css" />
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/Chat.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 }
-
-<div class = "chat-container">
-    <div class = "chat-header">
-        <button class = "btn btn-back" onclick = "window.history.back()">
-            <i class = "fas fa-arrow-left"></i> Back
+<div class="chat-container">
+    <div class="chat-header">
+        <button class="btn btn-back" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
         </button>
         <h3> @receiverUsername </h3>
     </div>
-    <div class = "chat-messages" id = "chatMessages">
+    <div class="chat-messages" id="chatMessages">
         @foreach (var message in Model)
         {
             var isMe = message.SenderId == currentUserId!.ToString();
-            <div class = "chat-message @(isMe ? "sent" : "received")">
-                <div class = "message-content"> @message.Content </div>
-                <div class = "message-timestamp">
+            <div class="chat-message @(isMe ? "sent" : "received")">
+                <div class="message-content"> @message.Content </div>
+                <div class="message-timestamp">
                     @message.SentAt.ToString("h:mm tt")
                 </div>
             </div>
         }
     </div>
-    <form id = "messageForm" class = "chat-input">
-        <input type = "text" id = "messageInput" name = "content" placeholder = "Type a message ..." required autocomplete = "off" />
-        <button type = "submit" id = "sendButton">
-            <i class = "fas fa-paper-plane"></i>
+    <form id="messageForm" class="chat-input">
+        <input type="text" id="messageInput" name="content" placeholder="Type a message ..." required autocomplete="off" />
+        <button type="submit" id="sendButton">
+            <i class="fas fa-paper-plane"></i>
         </button>
     </form>
 </div>
-
 @section Scripts {
-    <script src = "~/lib/SignalR/signalr.js"></script>
+    <script src="~/lib/SignalR/signalr.js"></script>
     <script>
         var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
-
         var currentChatId = "@chatId";
         var currentUserId = "@currentUserId";
         var receiverId = "@receiverId";
-
+        var receiverUsername = "@receiverUsername";
         document.getElementById("sendButton").disabled = true;
 
-        connection.on("ReceiveMessage", function (chatId, senderId, receiverId, content) {
+        connection.on("ReceiveMessage", function (senderId, content) {
             var isMe = senderId === currentUserId;
             var timestamp = formatTime(new Date());
-
             var messageDiv = document.createElement("div");
             messageDiv.className = "chat-message " + (isMe ? "sent" : "received");
-
             messageDiv.innerHTML = `
                 <div class="message-content">${content}</div>
                 <div class="message-timestamp">${timestamp}</div>
             `;
-
             document.getElementById("chatMessages").appendChild(messageDiv);
             document.getElementById("chatMessages").scrollTop = document.getElementById("chatMessages").scrollHeight;
+
+            // If message is received (not sent by current user), mark as read
+            if (!isMe) {
+                connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
+                    .catch(function (err) {
+                        console.error("Error marking messages as read: " + err.toString());
+                    });
+            }
+        });
+
+        // Handle messages marked as read event
+        connection.on("MessagesMarkedAsRead", function(chatId) {
+            if (chatId === currentChatId) {
+                console.log("Messages marked as read for current chat");
+                // You can add any UI updates here if needed
+            }
         });
 
         function formatTime(date) {
@@ -74,6 +82,12 @@
         connection.start().then(function () {
             document.getElementById("sendButton").disabled = false;
             connection.invoke("JoinGroup", currentChatId);
+
+            // Mark messages as read when chat is opened
+            connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
+                .catch(function (err) {
+                    console.error("Error marking messages as read on open: " + err.toString());
+                });
         }).catch(function (err) {
             return console.error(err.toString());
         });
@@ -86,6 +100,24 @@
                 });
             document.getElementById("messageInput").value = "";
             event.preventDefault();
+        });
+
+        // Mark messages as read when the page becomes visible (user returns to tab)
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
+                    .catch(function (err) {
+                        console.error("Error marking messages as read on visibility change: " + err.toString());
+                    });
+            }
+        });
+
+        // Mark messages as read when window gets focus
+        window.addEventListener('focus', function() {
+            connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
+                .catch(function (err) {
+                    console.error("Error marking messages as read on focus: " + err.toString());
+                });
         });
     </script>
 }

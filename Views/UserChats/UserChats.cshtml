@@ -5,35 +5,91 @@
 }
 
 @section Styles {
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
-    <link rel = "stylesheet" href = "~/css/UserChats.css" asp-append-version = "true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/UserChats.css" asp-append-version="true" />
+    <style>
+        .unread-badge {
+            background-color: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 2px 6px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: auto;
+        }
+
+        .chat-item.has-unread {
+            background-color: rgba(0, 123, 255, 0.05);
+            border-left: 3px solid #007bff;
+        }
+
+        .chat-item.has-unread .chat-username {
+            font-weight: 600;
+        }
+
+        .chat-item.has-unread .chat-message {
+            font-weight: 500;
+            color: #333;
+        }
+
+        .chat-header-with-badge {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 100%;
+        }
+
+        .chat-time-and-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    </style>
 }
 
-<div class = "chat-list-container">
-    <div class = "chat-list-header">
-        <button class = "btn-back" onclick = "window.history.back()">
-            <i class = "fas fa-arrow-left"></i> Back
+<div class="chat-list-container">
+    <div class="chat-list-header">
+        <button class="btn-back" onclick="window.history.back()">
+            <i class="fas fa-arrow-left"></i> Back
         </button>
-        <h2> My Chats </h2>
+        <h2>My Chats</h2>
     </div>
-    <div class = "chat-list-content">
+    <div class="chat-list-content">
         @if (Model.Any())
         {
-            <div class = "chat-items">
+            <div class="chat-items" id="chatItemsContainer">
                 @foreach (var chat in Model)
                 {
-                    <a href = "@Url.Action("OpenChat", "Chat", new { receiverId = chat.ReceiverId, receiverUsername = chat.ReceiverUsername })" class = "chat-item">
-                        <div class = "chat-avatar">
-                            <i class = "fas fa-user-circle"></i>
+                    <!-- ADDED: data-receiver-id, data-chat-id, and unread count attributes -->
+                    <a href="@Url.Action("OpenChat", "Chat", new { receiverId = chat.ReceiverId, receiverUsername = chat.ReceiverUsername })"
+                       class="chat-item @(chat.UnreadCount > 0 ? "has-unread" : "")"
+                       data-receiver-id="@chat.ReceiverId"
+                       data-chat-id="@chat.ChatId"
+                       data-unread-count="@chat.UnreadCount">
+                        <div class="chat-avatar">
+                            <i class="fas fa-user-circle"></i>
                         </div>
-                        <div class = "chat-details">
-                            <div class = "chat-header">
-                                <span class = "chat-username"> @chat.ReceiverUsername </span>
-                                <span class = "chat-time"> @chat.LastMessageTime.ToString("h:mm tt") </span>
+                        <div class="chat-details">
+                            <div class="chat-header">
+                                <div class="chat-header-with-badge">
+                                    <span class="chat-username">@chat.ReceiverUsername</span>
+                                    <div class="chat-time-and-badge">
+                                        <span class="chat-time">@chat.LastMessageTime.ToString("h:mm tt")</span>
+                                        @if (chat.UnreadCount > 0)
+                                        {
+                                            <span class="unread-badge">@chat.UnreadCount</span>
+                                        }
+                                    </div>
+                                </div>
                             </div>
-                            <div class = "chat-preview">
-                                <p class = "chat-message"> @(chat.LastMessage.Length > 30 ? chat.LastMessage.Substring(0, 30) + "..." : chat.LastMessage) </p>
+                            <div class="chat-preview">
+                                <p class="chat-message">@(chat.LastMessage.Length > 30 ? chat.LastMessage.Substring(0, 30) + "..." : chat.LastMessage)</p>
                             </div>
                         </div>
                     </a>
@@ -42,10 +98,168 @@
         }
         else
         {
-            <div class = "no-chats">
-                <i class = "fas fa-comment-slash"></i>
-                <p> No conversations yet </p>
+            <div class="no-chats" id="noChatsMessage">
+                <i class="fas fa-comment-slash"></i>
+                <p>No conversations yet</p>
             </div>
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/lib/SignalR/signalr.js"></script>
+    <script>
+        var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+
+        // Function to format time
+        function formatTime(dateString) {
+            if (!dateString) return '';
+            var date = new Date(dateString);
+            return date.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Function to truncate message
+        function truncateMessage(message, maxLength = 30) {
+            if (!message) return '';
+            return message.length > maxLength ? message.substring(0, maxLength) + "..." : message;
+        }
+
+        // Function to update unread badge
+        function updateUnreadBadge(chatElement, unreadCount) {
+            var timeAndBadgeContainer = chatElement.querySelector('.chat-time-and-badge');
+            var existingBadge = timeAndBadgeContainer.querySelector('.unread-badge');
+
+            if (unreadCount > 0) {
+                if (existingBadge) {
+                    existingBadge.textContent = unreadCount;
+                } else {
+                    var badge = document.createElement('span');
+                    badge.className = 'unread-badge';
+                    badge.textContent = unreadCount;
+                    timeAndBadgeContainer.appendChild(badge);
+                }
+                chatElement.classList.add('has-unread');
+            } else {
+                if (existingBadge) {
+                    existingBadge.remove();
+                }
+                chatElement.classList.remove('has-unread');
+            }
+
+            // Update data attribute
+            chatElement.setAttribute('data-unread-count', unreadCount);
+        }
+
+        connection.on("UpdateChatList", function(senderId, senderUsername, lastMessage, lastMessageTime, unreadCount) {
+            try {
+                var chatContainer = document.getElementById("chatItemsContainer");
+                var noChatsMessage = document.getElementById("noChatsMessage");
+
+                // Hide "no chats" message if it exists
+                if (noChatsMessage) {
+                    noChatsMessage.style.display = 'none';
+                }
+
+                // Check if chat already exists
+                var existingChat = document.querySelector(`[data-receiver-id="${senderId}"]`);
+                console.log("Existing chat found:", existingChat ? "Yes" : "No");
+
+                if (existingChat) {
+                    // Update existing chat
+                    var timeElement = existingChat.querySelector('.chat-time');
+                    var messageElement = existingChat.querySelector('.chat-message');
+
+                    if (timeElement) {
+                        timeElement.textContent = formatTime(lastMessageTime);
+                    }
+                    if (messageElement) {
+                        messageElement.textContent = truncateMessage(lastMessage);
+                    }
+
+                    // Update unread count
+                    updateUnreadBadge(existingChat, unreadCount || 0);
+
+                    // Move to top
+                    if (chatContainer && chatContainer.firstChild) {
+                        chatContainer.insertBefore(existingChat, chatContainer.firstChild);
+                    }
+                    console.log("Updated existing chat with unread count:", unreadCount);
+                } else {
+                    // Create new chat item
+                    var newChatItem = document.createElement('a');
+                    newChatItem.href = `/Chat/OpenChat?receiverId=${senderId}&receiverUsername=${encodeURIComponent(senderUsername)}`;
+                    newChatItem.className = 'chat-item' + (unreadCount > 0 ? ' has-unread' : '');
+                    newChatItem.setAttribute('data-receiver-id', senderId);
+                    newChatItem.setAttribute('data-unread-count', unreadCount || 0);
+
+                    var unreadBadgeHtml = unreadCount > 0 ? `<span class="unread-badge">${unreadCount}</span>` : '';
+
+                    newChatItem.innerHTML = `
+                        <div class="chat-avatar">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="chat-details">
+                            <div class="chat-header">
+                                <div class="chat-header-with-badge">
+                                    <span class="chat-username">${senderUsername || 'Unknown User'}</span>
+                                    <div class="chat-time-and-badge">
+                                        <span class="chat-time">${formatTime(lastMessageTime)}</span>
+                                        ${unreadBadgeHtml}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="chat-preview">
+                                <p class="chat-message">${truncateMessage(lastMessage)}</p>
+                            </div>
+                        </div>
+                    `;
+
+                    // Add to top of list
+                    if (chatContainer) {
+                        if (chatContainer.firstChild) {
+                            chatContainer.insertBefore(newChatItem, chatContainer.firstChild);
+                        } else {
+                            chatContainer.appendChild(newChatItem);
+                        }
+                    } else {
+                        // Create chat container if it doesn't exist
+                        var chatListContent = document.querySelector('.chat-list-content');
+                        if (chatListContent) {
+                            var newContainer = document.createElement('div');
+                            newContainer.className = 'chat-items';
+                            newContainer.id = 'chatItemsContainer';
+                            newContainer.appendChild(newChatItem);
+                            chatListContent.appendChild(newContainer);
+                        }
+                    }
+                    console.log("Created new chat item with unread count:", unreadCount);
+                }
+            } catch (error) {
+                console.error("Error in UpdateChatList:", error);
+            }
+        });
+
+        // Handle messages marked as read
+        connection.on("MessagesMarkedAsRead", function(chatId) {
+            try {
+                var chatElement = document.querySelector(`[data-chat-id="${chatId}"]`);
+                if (chatElement) {
+                    updateUnreadBadge(chatElement, 0);
+                    console.log("Marked messages as read for chat:", chatId);
+                }
+            } catch (error) {
+                console.error("Error in MessagesMarkedAsRead:", error);
+            }
+        });
+
+        connection.start().then(function () {
+            console.log("SignalR connection established for chat list");
+        }).catch(function (err) {
+            console.error("SignalR connection error: " + err.toString());
+        });
+    </script>
+}

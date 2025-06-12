@@ -8,10 +8,14 @@ namespace Talkify.Hubs
     {
 
         private readonly IMessageRepository messageRepository = null!;
-        
-        public ChatHub(IMessageRepository messageRepository)
+        private readonly IUserRepository userRepository = null!;
+        private readonly IChatRepository chatRepository = null!;
+
+        public ChatHub(IMessageRepository messageRepository, IUserRepository userRepository, IChatRepository chatRepository)
         {
             this.messageRepository = messageRepository;
+            this.userRepository = userRepository;
+            this.chatRepository = chatRepository;
         }
 
         public async Task JoinGroup(string chatId)
@@ -31,7 +35,24 @@ namespace Talkify.Hubs
 
             await messageRepository.AddMessageAsync(message);
 
-            await Clients.Group(chatId).SendAsync("ReceiveMessage", chatId, senderId, receiverId, content);
+            await chatRepository.IncrementUnreadCountAsync(chatId, receiverId);
+
+            await Clients.Group(chatId).SendAsync("ReceiveMessage", senderId, content);
+
+            var senderUsername = await userRepository.GetUsernameById(senderId);
+            var lastMessage = content;
+            var lastMessageTime = message.SentAt;
+
+            var unreadCount = await chatRepository.GetUnreadCountAsync(chatId, receiverId);
+
+            await Clients.User(receiverId).SendAsync("UpdateChatList", senderId, senderUsername, lastMessage, lastMessageTime, unreadCount);
+        }
+
+        public async Task MarkMessagesAsRead(string chatId, string userId)
+        {
+            await chatRepository.MarkMessagesAsReadAsync(chatId, userId);
+
+            await Clients.User(userId).SendAsync("MessagesMarkedAsRead", chatId);
         }
 
     }

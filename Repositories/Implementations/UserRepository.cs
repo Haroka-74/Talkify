@@ -20,5 +20,10 @@ namespace Talkify.Repositories.Implementations
             return await context.Users.ToListAsync();
         }
 
+        public async Task<string?> GetUsernameById(string id)
+        {
+            var user = await context.Users.FirstOrDefaultAsync(u => u.Id == id);
+            return user?.UserName;
+        }
     }
 }
