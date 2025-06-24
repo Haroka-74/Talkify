@@ -85,5 +85,25 @@ namespace Talkify.Repositories.Implementations
             return 0;
         }
 
+        public async Task<int> GetTotalUnreadCountAsync(string userId)
+        {
+            var userChats = await context.Chats
+                .Where(c => c.UserId1 == userId || c.UserId2 == userId)
+                .ToListAsync();
+
+            int totalUnread = 0;
+            foreach (var chat in userChats)
+            {
+                if (chat.UserId1 == userId)
+                {
+                    totalUnread += chat.UnreadCountUser1;
+                }
+                else if (chat.UserId2 == userId)
+                {
+                    totalUnread += chat.UnreadCountUser2;
+                }
+            }
+            return totalUnread;
+        }
     }
 }

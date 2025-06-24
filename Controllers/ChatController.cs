@@ -38,27 +38,9 @@ namespace Talkify.Controllers
             var currentUserId = ClaimsPrincipalExtensions.GetUserId(User);
             ViewData["currentUserId"] = currentUserId;
 
-            await chatRepository.MarkMessagesAsReadAsync(chatId, currentUserId);
-
-            // Notify the hub to update unread count
-            await hubContext.Clients.User(currentUserId).SendAsync("MessagesMarkedAsRead", chatId);
-
             var chatMessages = await chatService.GetChatMessages(chatId);
 
             return View(chatMessages);
-        }
-
-
-        [HttpPost]
-        public async Task<IActionResult> MarkAsRead(string chatId)
-        {
-            var currentUserId = ClaimsPrincipalExtensions.GetUserId(User);
-            await chatRepository.MarkMessagesAsReadAsync(chatId, currentUserId);
-
-            // Notify the hub to update unread count
-            await hubContext.Clients.User(currentUserId).SendAsync("MessagesMarkedAsRead", chatId);
-
-            return Ok();
         }
 
     }

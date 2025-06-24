@@ -12,5 +12,6 @@ namespace Talkify.Repositories.Interfaces
         Task IncrementUnreadCountAsync(string chatId, string userId);
         Task MarkMessagesAsReadAsync(string chatId, string userId);
         Task<int> GetUnreadCountAsync(string chatId, string userId);
+        Task<int> GetTotalUnreadCountAsync(string userId);
     }
 }

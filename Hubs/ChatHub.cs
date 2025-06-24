@@ -46,6 +46,9 @@ namespace Talkify.Hubs
             var unreadCount = await chatRepository.GetUnreadCountAsync(chatId, receiverId);
 
             await Clients.User(receiverId).SendAsync("UpdateChatList", senderId, senderUsername, lastMessage, lastMessageTime, unreadCount);
+
+            var totalUnreadCount = await chatRepository.GetTotalUnreadCountAsync(receiverId);
+            await Clients.User(receiverId).SendAsync("UpdateGlobalUnreadCount", totalUnreadCount);
         }
 
         public async Task MarkMessagesAsRead(string chatId, string userId)
@@ -53,6 +56,9 @@ namespace Talkify.Hubs
             await chatRepository.MarkMessagesAsReadAsync(chatId, userId);
 
             await Clients.User(userId).SendAsync("MessagesMarkedAsRead", chatId);
+
+            var totalUnreadCount = await chatRepository.GetTotalUnreadCountAsync(userId);
+            await Clients.User(userId).SendAsync("UpdateGlobalUnreadCount", totalUnreadCount);
         }
 
     }

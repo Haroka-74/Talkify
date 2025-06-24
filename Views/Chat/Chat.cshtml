@@ -67,14 +67,6 @@
             }
         });
 
-        // Handle messages marked as read event
-        connection.on("MessagesMarkedAsRead", function(chatId) {
-            if (chatId === currentChatId) {
-                console.log("Messages marked as read for current chat");
-                // You can add any UI updates here if needed
-            }
-        });
-
         function formatTime(date) {
             return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
         }
@@ -102,22 +94,5 @@
             event.preventDefault();
         });
 
-        // Mark messages as read when the page becomes visible (user returns to tab)
-        document.addEventListener('visibilitychange', function() {
-            if (!document.hidden) {
-                connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
-                    .catch(function (err) {
-                        console.error("Error marking messages as read on visibility change: " + err.toString());
-                    });
-            }
-        });
-
-        // Mark messages as read when window gets focus
-        window.addEventListener('focus', function() {
-            connection.invoke("MarkMessagesAsRead", currentChatId, currentUserId)
-                .catch(function (err) {
-                    console.error("Error marking messages as read on focus: " + err.toString());
-                });
-        });
     </script>
 }

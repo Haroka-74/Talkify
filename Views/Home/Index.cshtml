@@ -1,59 +1,125 @@
 ﻿@using System.Security.Claims
 @using Talkify.Extensions
-
 @{
     ViewData["Title"] = "Home";
 }
-
 @section Styles {
-    <link rel = "stylesheet" href = "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href = "https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel = "stylesheet">
-    <link rel = "stylesheet" href = "~/css/Home.css" asp-append-version = "true" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Gabarito:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/Home.css" asp-append-version="true" />
+    <style>
+        .global-unread-badge {
+            background-color: #ff4757;
+            color: white;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 12px;
+            font-weight: bold;
+            min-width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-left: 8px;
+            position: relative;
+            top: -2px;
+        }
+
+        .btn-chat {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
 }
 
-<div class = "home-container">
-    <div class = "hero-card">
-        <div class = "logo-container">
-            <i class = "fas fa-comment-dots logo-icon"></i>
+<div class="home-container">
+    <div class="hero-card">
+        <div class="logo-container">
+            <i class="fas fa-comment-dots logo-icon"></i>
             @if (User.Identity.IsAuthenticated)
             {
-                <h1 class="app-title"> Welcome @ClaimsPrincipalExtensions.GetUsername(User) </h1>
+                <h1 class="app-title">Welcome @ClaimsPrincipalExtensions.GetUsername(User)</h1>
             }
             else
             {
-                <h1 class = "app-title"> Welcome To Talkify </h1>
-                <p class = "app-subtitle"> Connect with friends and communities </p>
+                <h1 class="app-title">Welcome To Talkify</h1>
+                <p class="app-subtitle">Connect with friends and communities</p>
             }
         </div>
         @if (User.Identity.IsAuthenticated)
         {
-            <div class = "auth-buttons">
-                <a asp-controller = "Search" asp-action = "Index" class = "btn btn-search">
-                    <i class = "fas fa-search"></i> Search Users
+            <div class="auth-buttons">
+                <a asp-controller="Search" asp-action="Index" class="btn btn-search">
+                    <i class="fas fa-search"></i> Search Users
                 </a>
-                <a asp-controller = "UserChats" asp-action = "Index" class = "btn btn-chat">
-                    <i class = "fas fa-user-friends"> </i> My Chats
+                <a asp-controller="UserChats" asp-action="Index" class="btn btn-chat">
+                    <i class="fas fa-user-friends"></i> My Chats
+                    <span id="globalUnreadBadge" class="global-unread-badge @(ViewData["TotalUnreadCount"]?.ToString() == "0" || ViewData["TotalUnreadCount"] == null ? "hidden" : "")">
+                        @(ViewData["TotalUnreadCount"]?.ToString() != "0" ? ViewData["TotalUnreadCount"] : "")
+                    </span>
                 </a>
-                <a asp-controller = "Group" asp-action = "MyGroups" class = "btn btn-group">
-                    <i class="fas fa-users-cog"> </i> My Groups
+                <a asp-controller="Group" asp-action="MyGroups" class="btn btn-group">
+                    <i class="fas fa-users-cog"></i> My Groups
                 </a>
-                <form asp-controller = "Auth" asp-action = "Logout" method = "post" class = "d-inline">
-                    <button type = "submit" class = "btn btn-logout">
-                        <i class = "fas fa-sign-out-alt fa-flip-horizontal"> </i> Sign Out
+                <form asp-controller="Auth" asp-action="Logout" method="post" class="d-inline">
+                    <button type="submit" class="btn btn-logout">
+                        <i class="fas fa-sign-out-alt fa-flip-horizontal"></i> Sign Out
                     </button>
                 </form>
             </div>
         }
         else
         {
-            <div class = "auth-buttons">
-                <a asp-controller = "Auth" asp-action = "Login" class = "btn btn-login">
-                    <i class = "fas fa-sign-in-alt"> </i> Login
+            <div class="auth-buttons">
+                <a asp-controller="Auth" asp-action="Login" class="btn btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Login
                 </a>
-                <a asp-controller = "Auth" asp-action = "Register" class = "btn btn-register">
-                    <i class = "fas fa-user-plus"> </i> Register
+                <a asp-controller="Auth" asp-action="Register" class="btn btn-register">
+                    <i class="fas fa-user-plus"></i> Register
                 </a>
             </div>
         }
     </div>
 </div>
+
+@if (User.Identity.IsAuthenticated)
+{
+    @section Scripts {
+        <script src="~/lib/SignalR/signalr.js"></script>
+        <script>
+            var connection = new signalR.HubConnectionBuilder().withUrl("/chatHub").build();
+            var currentUserId = "@ClaimsPrincipalExtensions.GetUserId(User)";
+
+            // Function to update global unread badge
+            function updateGlobalUnreadBadge(totalUnreadCount) {
+                var badge = document.getElementById('globalUnreadBadge');
+                if (badge) {
+                    if (totalUnreadCount > 0) {
+                        badge.textContent = totalUnreadCount;
+                        badge.classList.remove('hidden');
+                    } else {
+                        badge.classList.add('hidden');
+                    }
+                }
+            }
+
+            // Listen for global unread count updates
+            connection.on("UpdateGlobalUnreadCount", function(totalUnreadCount) {
+                console.log("Received global unread count update:", totalUnreadCount);
+                updateGlobalUnreadBadge(totalUnreadCount);
+            });
+
+            // Start SignalR connection
+            connection.start().then(function () {
+                console.log("SignalR connection established for home page");
+            }).catch(function (err) {
+                console.error("SignalR connection error: " + err.toString());
+            });
+        </script>
+    }
+}
